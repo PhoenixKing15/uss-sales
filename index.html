@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>USS Events — Sales Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090d;--s1:#0e1117;--s2:#141820;--s3:#1c2130;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);--accent:#00e5a0;--accent2:#00b37d;--adim:rgba(0,229,160,0.08);--adim2:rgba(0,229,160,0.15);--text:#eef0f4;--text2:#7d8898;--text3:#3d4552;--amber:#f5a623;--adimb:rgba(245,166,35,0.1);--blue:#4a9eff;--bdim:rgba(74,158,255,0.1);--red:#ff5f5f;--rdim:rgba(255,95,95,0.08);--r:10px;--rl:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+
+/* HEADER */
+.hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.logo{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.logo span{color:var(--accent)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.quota-badge{font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;border:1px solid var(--border2);color:var(--text2);cursor:pointer;transition:all .2s;background:transparent;font-family:'DM Sans',sans-serif}
+.quota-badge:hover{border-color:var(--accent);color:var(--accent)}
+.quota-badge.set{border-color:var(--accent);color:var(--accent);background:var(--adim)}
+.save-indicator{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)}
+.save-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:savepulse 3s infinite}
+@keyframes savepulse{0%,100%{opacity:.4}50%{opacity:1}}
+.date-txt{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+
+/* NAV */
+.nav{background:var(--s1);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.ntab{font-size:12px;font-weight:500;letter-spacing:.03em;padding:13px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text3);white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;transition:color .2s,border-color .2s}
+.ntab:hover{color:var(--text2)}
+.ntab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* MAIN */
+.main{max-width:980px;margin:0 auto;padding:28px 24px 80px}
+.panel{display:none}.panel.active{display:block}
+.pg-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:-.03em;margin-bottom:6px}
+.pg-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7;max-width:600px}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:20px 22px;margin-bottom:14px}
+.card-accent{border-color:var(--accent);background:var(--adim)}
+.ctitle{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;font-family:'DM Mono',monospace}
+
+/* FORMS */
+label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:500}
+input,select,textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select{cursor:pointer}
+option{background:var(--s2)}
+textarea{resize:vertical;min-height:80px;line-height:1.65}
+.g1{margin-bottom:13px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:13px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+
+/* BUTTONS */
+.btn{width:100%;padding:11px;background:var(--accent);color:#000;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:none;border-radius:var(--r);cursor:pointer;transition:background .15s,transform .1s;letter-spacing:.01em;margin-top:6px}
+.btn:hover{background:#00f0ab}
+.btn:active{transform:scale(.99)}
+.btn-ghost{padding:7px 14px;background:transparent;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;border:1px solid var(--accent);border-radius:var(--r);cursor:pointer;transition:background .15s;white-space:nowrap}
+.btn-ghost:hover{background:var(--adim)}
+.btn-text{background:none;border:none;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;padding:5px 0}
+.btn-text:hover{opacity:.7}
+.btn-danger-icon{background:none;border:none;cursor:pointer;color:var(--red);font-size:19px;line-height:1;padding:0 4px;transition:opacity .15s}
+.btn-danger-icon:hover{opacity:.7}
+.btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+
+/* METRICS */
+.metric{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:15px}
+.metric.good{border-color:rgba(0,229,160,.3)}
+.metric.warn{border-color:rgba(245,166,35,.3)}
+.metric.bad{border-color:rgba(255,95,95,.3)}
+.mlabel{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;font-family:'DM Mono',monospace}
+.mval{font-size:26px;font-weight:700;color:var(--text);font-family:'Syne',sans-serif;line-height:1}
+.msub{font-size:11px;color:var(--text3);margin-top:4px}
+.ptrack{height:4px;background:var(--s3);border-radius:2px;overflow:hidden;margin:8px 0 4px}
+.pbar{height:100%;border-radius:2px;transition:width .5s ease}
+.pbar-a{background:var(--accent)}
+.pbar-b{background:var(--amber)}
+.pbar-c{background:var(--red)}
+
+/* OUTPUT */
+.output{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;font-family:'DM Mono',monospace;font-size:12px;margin-top:10px;word-break:break-word}
+
+/* TAGS */
+.tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:.04em}
+.tg{background:rgba(0,229,160,.12);color:var(--accent);border:1px solid rgba(0,229,160,.25)}
+.tb{background:var(--bdim);color:var(--blue);border:1px solid rgba(74,158,255,.25)}
+.ta{background:var(--adimb);color:var(--amber);border:1px solid rgba(245,166,35,.25)}
+.tr{background:var(--rdim);color:var(--red);border:1px solid rgba(255,95,95,.25)}
+
+/* DIVIDER */
+.div{height:1px;background:var(--border);margin:16px 0}
+
+/* ROWS */
+.lead-row{display:flex;align-items:flex-start;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);gap:12px}
+.lead-row:last-child{border-bottom:none}
+.lead-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.lead-sub{font-size:11px;color:var(--text3);line-height:1.5}
+
+/* SCRIPT BLOCK */
+.sblock{border-left:2px solid var(--accent);padding:10px 14px;margin:10px 0;background:var(--adim);border-radius:0 var(--r) var(--r) 0;font-size:13px;line-height:1.7}
+.sblock strong{color:var(--accent);font-weight:600}
+
+/* UNIT ROWS */
+.urow{display:grid;grid-template-columns:2fr 80px 80px 34px;gap:10px;align-items:end;margin-bottom:10px}
+
+/* FU CARDS */
+.fu-card{border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;background:var(--s2)}
+.day-pill{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-bottom:7px;background:var(--adimb);color:var(--amber);border:1px solid rgba(245,166,35,.25);letter-spacing:.04em}
+.fu-sub{font-size:13px;font-weight:500;margin-bottom:5px}
+.fu-body{font-size:13px;color:var(--text2);line-height:1.65}
+
+/* BRIEF ROWS */
+.brief-row{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border)}
+.brief-row:last-child{border-bottom:none}
+.bicon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;font-family:'DM Mono',monospace}
+.bi-a{background:var(--adim);color:var(--accent)}
+.bi-b{background:var(--adimb);color:var(--amber)}
+.bi-c{background:var(--bdim);color:var(--blue)}
+.btxt{font-size:13px;font-weight:500}
+.bsub{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.5}
+
+/* TRANSCRIPT */
+.t-wrap{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px;min-height:130px;max-height:250px;overflow-y:auto}
+.t-line{display:flex;gap:7px;padding:3px 0;border-bottom:1px solid var(--border);align-items:flex-start;font-size:13px;line-height:1.6}
+.t-line:last-child{border-bottom:none}
+.t-lbl{font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;white-space:nowrap;flex-shrink:0;margin-top:2px;letter-spacing:.06em}
+.lbl-me{background:var(--bdim);color:var(--blue)}
+.lbl-them{background:var(--adim2);color:var(--accent)}
+.lbl-auto{background:var(--s3);color:var(--text3)}
+.lbl-obj{background:var(--rdim);color:var(--red)}
+.lbl-act{background:var(--adimb);color:var(--amber)}
+.lbl-cmt{background:var(--adim2);color:var(--accent)}
+.t-txt{color:var(--text)}
+.t-interim{color:var(--text3);font-style:italic}
+.rec-dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0}
+.rec-dot.on{animation:rpulse 1s infinite}
+@keyframes rpulse{0%,100%{opacity:1}50%{opacity:.2}}
+.status-row{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);margin-bottom:9px;min-height:18px}
+.mode-row{display:flex;gap:6px;margin-bottom:13px;flex-wrap:wrap}
+.mpill{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);cursor:pointer;background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;transition:all .15s}
+.mpill.active{background:var(--adim);color:var(--accent);border-color:rgba(0,229,160,.4)}
+.hint{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:13px}
+.cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+.cs-item{background:var(--s3);border-radius:var(--r);padding:8px 10px}
+.cs-cmd{font-size:11px;font-weight:600;color:var(--accent);margin-bottom:2px;font-family:'DM Mono',monospace}
+.cs-desc{font-size:11px;color:var(--text3)}
+
+/* OBJECTION */
+.obj-item{padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.65}
+.obj-item:last-child{border-bottom:none}
+
+/* SPINNER */
+.spin{width:13px;height:13px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);padding:10px 0}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:var(--rl);padding:26px;width:360px;max-width:90vw}
+.modal h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:16px}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--accent);color:#000;font-size:12px;font-weight:600;padding:9px 16px;border-radius:var(--r);opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999;font-family:'DM Sans',sans-serif}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* SEARCH AI BADGE */
+.ai-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--adim);color:var(--accent);border:1px solid rgba(0,229,160,.25);letter-spacing:.04em;margin-bottom:12px}
+
+/* RESPONSIVE */
+@media(max-width:640px){.g2,.g3,.g4{grid-template-columns:1fr}.urow{grid-template-columns:1fr 60px 60px 30px}.main{padding:16px 14px 60px}.hdr,.nav{padding:0 14px}.pg-title{font-size:19px}.cs-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="logo-dot"></div>
+    <div>
+      <div class="logo">USS <span>Events</span></div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="save-indicator"><div class="save-dot"></div><span>Auto-saved</span></div>
+    <span class="date-txt" id="today-date"></span>
+    <button class="quota-badge" id="quota-badge" onclick="openModal()">Set quota</button>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="ntab active" onclick="nav('hunt')">New business</button>
+  <button class="ntab" onclick="nav('proposal')">Proposal builder</button>
+  <button class="ntab" onclick="nav('outreach')">Cold outreach</button>
+  <button class="ntab" onclick="nav('followup')">Follow-up engine</button>
+  <button class="ntab" onclick="nav('objections')">Objections</button>
+  <button class="ntab" onclick="nav('kpi')">KPI tracker</button>
+  <button class="ntab" onclick="nav('brief')">Daily briefing</button>
+  <button class="ntab" onclick="nav('crm')">Salesforce helper</button>
+  <button class="ntab" onclick="nav('listen')">Meeting listener</button>
+</div>
+
+<div class="main">
+
+<!-- ══════════ NEW BUSINESS HUNTER ══════════ -->
+<div id="p-hunt" class="panel active">
+  <div class="pg-title">New business hunter</div>
+  <div class="pg-sub">AI-powered live search finds real named events in your territory — not just places to look. Use every Monday morning.</div>
+  <div class="card">
+    <div class="ctitle">Live event search</div>
+    <div class="ai-badge">AI-powered — searches the web in real time</div>
+    <div class="g3">
+      <div><label>Event category</label>
+        <select id="h-cat">
+          <option value="music festival">Music festivals & concerts</option>
+          <option value="food wine festival">Food & wine festivals</option>
+          <option value="outdoor concert">Outdoor concerts</option>
+          <option value="5K charity run">Charity runs & 5Ks</option>
+          <option value="cultural art festival">Cultural & art festivals</option>
+          <option value="county fair carnival">County fairs & carnivals</option>
+          <option value="corporate outdoor event">Corporate outdoor events</option>
+          <option value="beer spirits festival">Beer & spirits festivals</option>
+          <option value="holiday outdoor event">Holiday & seasonal events</option>
+          <option value="triathlon marathon race">Triathlons & races</option>
+        </select>
+      </div>
+      <div><label>Territory</label>
+        <select id="h-region">
+          <option value="Orlando Central Florida">Orlando / Central FL</option>
+          <option value="Tampa Bay Florida">Tampa Bay Area</option>
+          <option value="Miami Fort Lauderdale South Florida">Miami / South FL</option>
+          <option value="Central and South Florida">All Central & South FL</option>
+        </select>
+      </div>
+      <div><label>Booking window</label>
+        <select id="h-time">
+          <option value="upcoming 2025">Upcoming — next 60 days</option>
+          <option value="summer 2025">Summer 2025</option>
+          <option value="fall 2025">Fall 2025</option>
+          <option value="winter holiday 2025">Winter / holiday 2025</option>
+          <option value="2026 annual">2026 / annual events</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" onclick="searchEvents()">Find real events now →</button>
+  </div>
+  <div id="hunt-out"></div>
+  <div class="card">
+    <div class="ctitle">Always-on lead sources — check weekly</div>
+    <div class="lead-row"><div><div class="lead-name">Florida Festival & Events Association (FFEA)</div><div class="lead-sub">Member directory = pre-qualified FL organizers. Request the member list directly at ffea.com</div></div><span class="tag tg">High value</span></div>
+    <div class="lead-row"><div><div class="lead-name">County permit offices</div><div class="lead-sub">Orange, Hillsborough, Miami-Dade parks & rec. A new permit = someone planning an event right now.</div></div><span class="tag tg">High value</span></div>
+    <div class="lead-row"><div><div class="lead-name">Eventbrite.com — search your territory weekly</div><div class="lead-sub">Events listed 60+ days out = hot prospecting window. Filter by location, search every Monday AM.</div></div><span class="tag tb">Weekly</span></div>
+    <div class="lead-row"><div><div class="lead-name">FL Dept of Business Regulation — temp food permits</div><div class="lead-sub">Temporary food service permits signal outdoor events. Fully public and searchable online.</div></div><span class="tag tb">Weekly</span></div>
+    <div class="lead-row"><div><div class="lead-name">Local CVBs (Tampa Bay, OCVB, Greater Miami)</div><div class="lead-sub">They know every major event 12 months out. Build these relationships — they'll refer you.</div></div><span class="tag ta">Relationship</span></div>
+    <div class="lead-row"><div><div class="lead-name">Event production & AV companies</div><div class="lead-sub">On-site at every event. Become their go-to referral for sanitation — recurring warm leads.</div></div><span class="tag ta">Referral</span></div>
+  </div>
+</div>
+
+<!-- ══════════ PROPOSAL BUILDER ══════════ -->
+<div id="p-proposal" class="panel">
+  <div class="pg-title">Proposal builder</div>
+  <div class="pg-sub">Build a professional, personalized proposal email in under 2 minutes. Upsell prompts fire automatically.</div>
+  <div class="card">
+    <div class="ctitle">Event & contact details</div>
+    <div class="g2">
+      <div><label>Company / organization</label><input type="text" id="p-co" placeholder="e.g. Tampa Bay Music Fest LLC"></div>
+      <div><label>Contact name</label><input type="text" id="p-ct" placeholder="e.g. Maria Santos"></div>
+    </div>
+    <div class="g2">
+      <div><label>Event name</label><input type="text" id="p-ev" placeholder="e.g. Suncoast Summer Festival"></div>
+      <div><label>Event date(s)</label><input type="text" id="p-dt" placeholder="e.g. July 4–6, 2025"></div>
+    </div>
+    <div class="g3">
+      <div><label>Attendance</label><input type="number" id="p-att" placeholder="2500"></div>
+      <div><label>Duration (days)</label><input type="number" id="p-days" value="1"></div>
+      <div><label>Location / venue</label><input type="text" id="p-loc" placeholder="e.g. Al Lopez Park, Tampa"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Services & pricing</div>
+    <div id="units-wrap">
+      <div class="urow">
+        <div><label>Product</label><select class="utype" onchange="calcTotal()"><option>Standard portable restroom</option><option>Restroom trailer (2-stall)</option><option>Restroom trailer (4-stall)</option><option>ADA-compliant restroom</option><option>Handwashing station</option><option>Hand sanitizer station</option><option>Temporary fence panel (8ft)</option><option>Crowd control barrier</option></select></div>
+        <div><label>Qty</label><input type="number" class="uqty" value="10" min="1" oninput="calcTotal()"></div>
+        <div><label>Days</label><input type="number" class="udays" value="3" min="1" oninput="calcTotal()"></div>
+        <button class="btn-danger-icon" onclick="removeUnit(this)">×</button>
+      </div>
+    </div>
+    <button class="btn-text" onclick="addUnit()">+ Add product line</button>
+    <div class="div"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--text3)">Estimated value</span>
+      <span style="font-size:24px;font-weight:700;font-family:'Syne',sans-serif;color:var(--accent)" id="p-total">$0</span>
+    </div>
+    <div id="upsell-hint" style="display:none;font-size:12px;color:var(--accent);margin-top:8px;padding:8px 12px;background:var(--adim);border-radius:var(--r)"></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Context & tone</div>
+    <div class="g2">
+      <div><label>Relationship stage</label>
+        <select id="p-stage">
+          <option>First contact — never bought from USS</option>
+          <option>Warm lead — had a conversation</option>
+          <option>Returning customer</option>
+          <option>Came from a referral</option>
+        </select>
+      </div>
+      <div><label>Their primary concern</label>
+        <select id="p-concern">
+          <option>Price sensitivity</option>
+          <option>Reliability / on-time delivery</option>
+          <option>Cleanliness / presentation</option>
+          <option>Last-minute booking</option>
+          <option>Unknown</option>
+        </select>
+      </div>
+    </div>
+    <div class="g1"><label>Special notes</label><textarea id="p-notes" placeholder="e.g. They had a bad experience with their last vendor. Want trailer option for VIP section."></textarea></div>
+  </div>
+  <button class="btn" onclick="genProposal()">Generate proposal email + talking points →</button>
+  <div id="prop-out"></div>
+</div>
+
+<!-- ══════════ COLD OUTREACH ══════════ -->
+<div id="p-outreach" class="panel">
+  <div class="pg-title">Smart outreach generator</div>
+  <div class="pg-sub">Cold emails, call scripts, voicemails, LinkedIn — personalized by account type. Covers cold prospects and existing USS accounts you've never personally worked.</div>
+  <div class="card">
+    <div class="ctitle">Build your outreach</div>
+    <div class="g2">
+      <div><label>Account type</label>
+        <select id="o-atype" onchange="toggleExisting()">
+          <option value="cold">Completely cold — no USS history</option>
+          <option value="existing">Existing USS account — never worked them</option>
+          <option value="oppty">Open opportunity in Salesforce</option>
+          <option value="lapsed">Past USS customer — went quiet</option>
+        </select>
+      </div>
+      <div><label>Outreach format</label>
+        <select id="o-fmt">
+          <option value="e1">Cold email — first touch</option>
+          <option value="e2">Value-add follow-up email</option>
+          <option value="call">Cold call script</option>
+          <option value="vm">Voicemail script</option>
+          <option value="li">LinkedIn message</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2">
+      <div><label>Prospect name</label><input type="text" id="o-name" placeholder="e.g. Jake Rivera"></div>
+      <div><label>Organization / event</label><input type="text" id="o-org" placeholder="e.g. Tampa Bay Craft Beer Festival"></div>
+    </div>
+    <div class="g2">
+      <div><label>Their role</label>
+        <select id="o-role">
+          <option>Event Director / Producer</option>
+          <option>Festival Coordinator</option>
+          <option>Operations Manager</option>
+          <option>Venue Manager</option>
+          <option>Marketing Director</option>
+          <option>Nonprofit Event Lead</option>
+          <option>Government / Parks & Rec</option>
+        </select>
+      </div>
+      <div><label>Value angle</label>
+        <select id="o-angle">
+          <option value="compliance">OSHA / health code compliance</option>
+          <option value="experience">Guest experience & presentation</option>
+          <option value="reliability">Reliability & on-time delivery</option>
+          <option value="speed">Fast turnaround / last-minute</option>
+          <option value="local">Local FL coverage & expertise</option>
+        </select>
+      </div>
+    </div>
+    <div id="existing-ctx" style="display:none">
+      <div class="div"></div>
+      <div class="ctitle">Existing account context</div>
+      <div class="g2">
+        <div><label>Last USS purchase / service</label><input type="text" id="o-last" placeholder="e.g. 20 standard units, March 2024"></div>
+        <div><label>Open opportunity / stage</label><input type="text" id="o-oppty" placeholder="e.g. Summer Festival 2025 — Qualified"></div>
+      </div>
+      <div class="g1"><label>Why did they go quiet or disengage?</label><textarea id="o-ctx" placeholder="e.g. Rep who managed them left USS. Open opp sitting at Qualified for 3 months with no activity."></textarea></div>
+    </div>
+    <button class="btn" onclick="genOutreach()">Generate outreach →</button>
+  </div>
+  <div id="out-out"></div>
+  <div class="card">
+    <div class="ctitle">Your USS value proposition — know these cold</div>
+    <div class="sblock"><strong>10-second pitch:</strong><br>"We help event organizers across Florida handle sanitation start to finish — delivery, setup, servicing, and pickup — so you never have to think about it on event day."</div>
+    <div class="sblock"><strong>30-second elevator pitch:</strong><br>"I work with United Site Services — the largest portable sanitation company in the US. We've been expanding our dedicated events division across Central and South Florida, specifically for festivals, concerts, and outdoor events. What makes us different is we build a full sanitation plan based on your attendance, layout, and duration so you're covered on health codes and your guests have a great experience. Most event coordinators tell me the restroom situation is what they dread most. We take it entirely off your plate."</div>
+    <div class="sblock"><strong>The one question that opens every door:</strong><br>"What's your current plan for restrooms at [event]?" — Let them answer. That's your conversation.</div>
+  </div>
+</div>
+
+<!-- ══════════ FOLLOW-UP ENGINE ══════════ -->
+<div id="p-followup" class="panel">
+  <div class="pg-title">Follow-up engine</div>
+  <div class="pg-sub">Ghosting after proposals is the most fixable problem in sales. Get a ready-to-send sequence with exact timing and copy.</div>
+  <div class="card">
+    <div class="ctitle">Build your sequence</div>
+    <div class="g2">
+      <div><label>Prospect name</label><input type="text" id="f-name" placeholder="e.g. Maria Santos"></div>
+      <div><label>Event quoted for</label><input type="text" id="f-ev" placeholder="e.g. Suncoast Summer Festival"></div>
+    </div>
+    <div class="g2">
+      <div><label>Time since proposal sent</label>
+        <select id="f-days">
+          <option value="1">Just sent today</option>
+          <option value="2">1–2 days ago</option>
+          <option value="5">3–5 days (no reply)</option>
+          <option value="10">1–2 weeks (ghosting)</option>
+          <option value="21">3+ weeks (cold)</option>
+        </select>
+      </div>
+      <div><label>Last interaction</label>
+        <select id="f-last">
+          <option>Opened email (no reply)</option>
+          <option>No opens at all</option>
+          <option>Replied but went quiet</option>
+          <option>Said "I'll think about it"</option>
+          <option>Left voicemail, no callback</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" onclick="genFollowup()">Build follow-up sequence →</button>
+  </div>
+  <div id="fu-out"></div>
+</div>
+
+<!-- ══════════ OBJECTIONS ══════════ -->
+<div id="p-objections" class="panel">
+  <div class="pg-title">Objection scripts</div>
+  <div class="pg-sub">Word-for-word responses to every objection you'll hear in events sales. Read these until they're second nature.</div>
+  <div class="card">
+    <div class="ctitle">Select objection</div>
+    <div class="g1">
+      <select id="obj-sel" onchange="showObj()">
+        <option value="">— Pick the objection you're hearing —</option>
+        <option value="price">Your price is too high</option>
+        <option value="vendor">We already have a vendor</option>
+        <option value="think">I need to think about it</option>
+        <option value="boss">I need to check with my boss</option>
+        <option value="small">Our event is too small</option>
+        <option value="late">We're booking too close to the event</option>
+        <option value="diy">We were going to handle it ourselves</option>
+        <option value="budget">We don't have budget for this</option>
+      </select>
+    </div>
+  </div>
+  <div id="obj-out"></div>
+</div>
+
+<!-- ══════════ KPI TRACKER ══════════ -->
+<div id="p-kpi" class="panel">
+  <div class="pg-title">KPI tracker</div>
+  <div class="pg-sub">Enter your numbers and get real-time pacing, close rate analysis, and coaching. Everything saves automatically.</div>
+  <div class="card">
+    <div class="ctitle">Monthly targets</div>
+    <div class="g3">
+      <div><label>Revenue quota ($)</label><input type="number" id="k-quota" value="100000" oninput="calcKPI();saveKPI()"></div>
+      <div><label>Target new accounts</label><input type="number" id="k-taccts" value="4" oninput="calcKPI();saveKPI()"></div>
+      <div><label>Target proposals sent</label><input type="number" id="k-tprops" value="20" oninput="calcKPI();saveKPI()"></div>
+    </div>
+    <div class="div"></div>
+    <div class="ctitle">Actuals this month</div>
+    <div class="g3">
+      <div><label>Revenue closed ($)</label><input type="number" id="k-rev" value="0" oninput="calcKPI();saveKPI()"></div>
+      <div><label>New accounts won</label><input type="number" id="k-won" value="0" oninput="calcKPI();saveKPI()"></div>
+      <div><label>Proposals sent</label><input type="number" id="k-psent" value="0" oninput="calcKPI();saveKPI()"></div>
+    </div>
+    <div class="g3">
+      <div><label>Cold calls made</label><input type="number" id="k-calls" value="0" oninput="calcKPI();saveKPI()"></div>
+      <div><label>Meetings booked</label><input type="number" id="k-meets" value="0" oninput="calcKPI();saveKPI()"></div>
+      <div><label>Active pipeline ($)</label><input type="number" id="k-pipe" value="0" oninput="calcKPI();saveKPI()"></div>
+    </div>
+  </div>
+  <div class="g4">
+    <div class="metric" id="km1"><div class="mlabel">Revenue to quota</div><div class="mval" id="km-rev">0%</div><div class="ptrack"><div class="pbar pbar-a" id="km-revbar" style="width:0%"></div></div><div class="msub" id="km-revsub">$0 of $100,000</div></div>
+    <div class="metric" id="km2"><div class="mlabel">New accounts</div><div class="mval" id="km-accts">0/4</div><div class="ptrack"><div class="pbar pbar-a" id="km-acctsbar" style="width:0%"></div></div><div class="msub" id="km-acctssub">0% of target</div></div>
+    <div class="metric"><div class="mlabel">Close rate</div><div class="mval" id="km-cr">—</div><div class="msub" id="km-crsub">proposals → wins</div></div>
+    <div class="metric"><div class="mlabel">Pipeline coverage</div><div class="mval" id="km-cov">—</div><div class="msub" id="km-covsub">vs remaining quota</div></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Coaching & pacing</div>
+    <div id="kpi-coach" style="font-size:13px;line-height:1.9;color:var(--text2);white-space:pre-line">Enter your actuals above to get personalized coaching.</div>
+  </div>
+</div>
+
+<!-- ══════════ DAILY BRIEFING ══════════ -->
+<div id="p-brief" class="panel">
+  <div class="pg-title">Daily briefing</div>
+  <div class="pg-sub">30 seconds every morning. Know your #1 priority, what's at risk, and how to approach the day.</div>
+  <div class="card">
+    <div class="ctitle">Build today's briefing</div>
+    <div class="g2">
+      <div><label>Today is</label><input type="text" id="b-date" placeholder="e.g. Monday, April 7"></div>
+      <div><label>Scheduled today</label><input type="text" id="b-sched" placeholder="e.g. 2 follow-up calls, 1 new prospect demo"></div>
+    </div>
+    <div class="g2">
+      <div><label>Hottest open deal</label><input type="text" id="b-hot" placeholder="e.g. Tampa Pride Festival — $8,400 quote, 3 days no reply"></div>
+      <div><label>Deal most at risk of going cold</label><input type="text" id="b-cold" placeholder="e.g. Sarasota Food Fest — sent quote 12 days ago"></div>
+    </div>
+    <div class="g2">
+      <div><label>Quota pacing</label>
+        <select id="b-quota">
+          <option value="ahead">Ahead of pace</option>
+          <option value="on">On pace</option>
+          <option value="behind">Behind — need to push</option>
+          <option value="start">Fresh start / early month</option>
+        </select>
+      </div>
+      <div><label>Energy today</label>
+        <select id="b-energy">
+          <option value="high">High — ready to attack</option>
+          <option value="med">Medium — need a quick win first</option>
+          <option value="low">Low — need momentum</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" onclick="genBriefing()">Generate my morning briefing →</button>
+  </div>
+  <div id="brief-out"></div>
+  <div class="card">
+    <div class="ctitle">Daily non-negotiables</div>
+    <div class="brief-row"><div class="bicon bi-a">10</div><div><div class="btxt">10 prospecting actions before noon</div><div class="bsub">Cold emails, LinkedIn touches, permit searches, referral asks — 10 every single day without exception</div></div></div>
+    <div class="brief-row"><div class="bicon bi-b">72h</div><div><div class="btxt">Follow up every open proposal within 72 hours</div><div class="bsub">If you sent a proposal and haven't heard back in 3 days, touch them. Every time, no exceptions.</div></div></div>
+    <div class="brief-row"><div class="bicon bi-a">SF</div><div><div class="btxt">Log every activity in Salesforce same day</div><div class="bsub">A call not logged didn't happen. Your pipeline is your performance record.</div></div></div>
+    <div class="brief-row"><div class="bicon bi-c">EV</div><div><div class="btxt">Find 1 new event lead every day</div><div class="bsub">Eventbrite, local event pages, permit sites — 5 minutes daily = 20+ leads per month</div></div></div>
+    <div class="brief-row"><div class="bicon bi-b">REF</div><div><div class="btxt">Ask every closed customer for a referral</div><div class="bsub">"Who else do you know running events this season?" — best lead is always a warm intro</div></div></div>
+  </div>
+</div>
+
+<!-- ══════════ SALESFORCE HELPER ══════════ -->
+<div id="p-crm" class="panel">
+  <div class="pg-title">Salesforce helper</div>
+  <div class="pg-sub">Paste rough call notes, get a clean formatted Salesforce activity log ready to copy-paste. Never stare at a blank notes field again.</div>
+  <div class="card">
+    <div class="ctitle">Call note generator</div>
+    <div class="g2">
+      <div><label>Account name</label><input type="text" id="sf-acct" placeholder="e.g. Suncoast Arts Festival"></div>
+      <div><label>Contact name & title</label><input type="text" id="sf-ct" placeholder="e.g. Dana Reyes, Event Director"></div>
+    </div>
+    <div class="g2">
+      <div><label>Call outcome</label>
+        <select id="sf-out">
+          <option value="connect">Connected — full conversation</option>
+          <option value="vm">Left voicemail</option>
+          <option value="na">No answer — no voicemail</option>
+          <option value="int">Expressed interest — wants a quote</option>
+          <option value="nr">Not ready now — future potential</option>
+          <option value="yes">Verbal yes — moving to proposal</option>
+        </select>
+      </div>
+      <div><label>Rough call notes</label><textarea id="sf-notes" placeholder="e.g. Festival July 12, ~800 attendees, uses local vendor but open to switching, wants quote by Thursday, budget ~$4k"></textarea></div>
+    </div>
+    <div class="g2">
+      <div><label>Next step agreed</label><input type="text" id="sf-next" placeholder="e.g. Send quote by Thursday, follow up Friday"></div>
+      <div><label>Estimated deal value</label><input type="text" id="sf-val" placeholder="e.g. $4,200"></div>
+    </div>
+    <button class="btn" onclick="genCRM()">Generate Salesforce note →</button>
+  </div>
+  <div id="crm-out"></div>
+  <div class="card">
+    <div class="ctitle">Opportunity stages</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="padding:11px;background:var(--s2);border-radius:var(--r);border:1px solid var(--border)"><div style="font-weight:500;margin-bottom:3px;font-size:13px">Prospecting</div><div style="font-size:11px;color:var(--text3)">Identified account. No real conversation yet.</div></div>
+      <div style="padding:11px;background:var(--s2);border-radius:var(--r);border:1px solid var(--border)"><div style="font-weight:500;margin-bottom:3px;font-size:13px">Qualified</div><div style="font-size:11px;color:var(--text3)">They have an event, a date, expressed interest.</div></div>
+      <div style="padding:11px;background:var(--s2);border-radius:var(--r);border:1px solid var(--border)"><div style="font-weight:500;margin-bottom:3px;font-size:13px">Proposal sent</div><div style="font-size:11px;color:var(--text3)">Quote sent. Follow up hard — this is where ghosting happens.</div></div>
+      <div style="padding:11px;background:var(--s2);border-radius:var(--r);border:1px solid var(--border)"><div style="font-weight:500;margin-bottom:3px;font-size:13px">Verbal / Closing</div><div style="font-size:11px;color:var(--text3)">They said yes. Get paperwork moving same day.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MEETING LISTENER ══════════ -->
+<div id="p-listen" class="panel">
+  <div class="pg-title">Meeting listener</div>
+  <div class="pg-sub">Records your call, labels who said what, then auto-generates a Salesforce note, follow-up email, and your action items the moment you stop.</div>
+  <div class="card">
+    <div class="ctitle">Call details</div>
+    <div class="g2">
+      <div><label>Account / prospect name</label><input type="text" id="m-acct" placeholder="e.g. Suncoast Arts Festival"></div>
+      <div><label>Contact name</label><input type="text" id="m-ct" placeholder="e.g. Dana Reyes"></div>
+    </div>
+    <div class="g2">
+      <div><label>Call type</label>
+        <select id="m-type">
+          <option value="cold">Cold call — first conversation</option>
+          <option value="followup">Follow-up on a proposal</option>
+          <option value="discovery">Discovery / needs assessment</option>
+          <option value="closing">Closing call</option>
+          <option value="checkin">Account check-in</option>
+        </select>
+      </div>
+      <div><label>Estimated deal value</label><input type="text" id="m-val" placeholder="e.g. $4,500"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Transcript mode</div>
+    <div class="mode-row">
+      <button class="mpill active" id="mp-auto" onclick="setMode('auto')">Auto label</button>
+      <button class="mpill" id="mp-speaker" onclick="setMode('speaker')">Speaker tag mode</button>
+      <button class="mpill" id="mp-manual" onclick="setMode('manual')">Manual paste</button>
+    </div>
+    <div id="hint-auto" class="hint">AI infers who is speaking from context — questions, sales language, responses. Works well for video calls and speakerphone. For cleaner output use Speaker Tag Mode.</div>
+    <div id="hint-speaker" class="hint" style="display:none">Say trigger phrases to label who's talking. Anything without a tag = you (default).<div class="cs-grid"><div class="cs-item"><div class="cs-cmd">they said / prospect said</div><div class="cs-desc">Labels as THEM</div></div><div class="cs-item"><div class="cs-cmd">objection / pushed back</div><div class="cs-desc">Flags as OBJECTION</div></div><div class="cs-item"><div class="cs-cmd">action item / note to self</div><div class="cs-desc">Flags as ACTION</div></div><div class="cs-item"><div class="cs-cmd">they committed / agreed</div><div class="cs-desc">Flags as COMMITTED</div></div></div></div>
+    <div id="hint-manual" style="display:none"></div>
+    <div id="rec-section">
+      <div class="status-row"><span class="rec-dot" id="rec-dot"></span><span id="rec-status">Ready — fill in call details above, then start recording</span><span id="rec-timer" style="margin-left:auto;font-size:11px;color:var(--text3)"></span></div>
+      <div class="t-wrap" id="t-wrap"><div style="color:var(--text3);font-size:12px;padding:3px 0" id="t-empty">Transcript will appear here as you speak...</div></div>
+      <div class="btn-row">
+        <button class="btn-ghost" id="btn-start" onclick="startRec()">Start recording</button>
+        <button class="btn-ghost" id="btn-stop" onclick="stopRec()" style="display:none">Stop & analyze</button>
+        <button class="btn-ghost" onclick="clearListen()">Clear</button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.6">Chrome required for live transcription. Phone on speakerphone near your laptop mic works well. Both voices are captured if the speaker is audible in the room.</div>
+    </div>
+    <div id="manual-section" style="display:none">
+      <div class="g1" style="margin-top:4px"><label>Paste transcript or type call notes</label><textarea id="manual-txt" style="min-height:130px" placeholder="Use speaker labels for best results:&#10;&#10;ME: Asked about their July event, ~800 attendees&#10;THEM: Uses ABC Portable now, open to switching&#10;THEM: Budget around $4k, needs quote by Thursday&#10;OBJECTION: Pushed back on pricing&#10;ACTION: Send quote today, follow up Friday&#10;&#10;Or just write freeform notes — AI will make sense of it."></textarea></div>
+      <button class="btn" onclick="analyzeText(document.getElementById('manual-txt').value)">Analyze & generate outputs →</button>
+    </div>
+  </div>
+  <div id="listen-out"></div>
+</div>
+
+</div><!-- end .main -->
+
+<!-- QUOTA MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+  <div class="modal">
+    <h2>Set your monthly quota</h2>
+    <div class="g1"><label>Monthly revenue target ($)</label><input type="number" id="modal-quota" placeholder="e.g. 100000"></div>
+    <button class="btn" style="margin-top:8px" onclick="setQuota()">Save →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PRICING={'Standard portable restroom':85,'Restroom trailer (2-stall)':320,'Restroom trailer (4-stall)':580,'ADA-compliant restroom':110,'Handwashing station':65,'Hand sanitizer station':35,'Temporary fence panel (8ft)':12,'Crowd control barrier':18};
+
+// ── INIT ──
+window.onload=()=>{
+  const d=new Date();
+  document.getElementById('today-date').textContent=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('b-date').value=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  loadKPI();loadQuota();calcTotal();
+};
+
+// ── NAV ──
+function nav(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── TOAST ──
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+// ── COPY ──
+function copy(text){navigator.clipboard.writeText(text).catch(()=>{const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);});toast('Copied!');}
+
+// ── QUOTA ──
+function openModal(){document.getElementById('modal-bg').classList.add('open');}
+function closeModal(e){if(e.target===document.getElementById('modal-bg'))document.getElementById('modal-bg').classList.remove('open');}
+function setQuota(){const v=document.getElementById('modal-quota').value;if(!v)return;localStorage.setItem('uss_quota',v);document.getElementById('k-quota').value=v;const b=document.getElementById('quota-badge');b.textContent='$'+parseInt(v).toLocaleString()+'/mo';b.classList.add('set');document.getElementById('modal-bg').classList.remove('open');calcKPI();toast('Quota saved!');}
+function loadQuota(){const v=localStorage.getItem('uss_quota');if(!v)return;document.getElementById('k-quota').value=v;document.getElementById('modal-quota').value=v;const b=document.getElementById('quota-badge');b.textContent='$'+parseInt(v).toLocaleString()+'/mo';b.classList.add('set');calcKPI();}
+
+// ── KPI ──
+function saveKPI(){const f=['k-quota','k-taccts','k-tprops','k-rev','k-won','k-psent','k-calls','k-meets','k-pipe'];const d={};f.forEach(x=>d[x]=document.getElementById(x).value);localStorage.setItem('uss_kpi',JSON.stringify(d));}
+function loadKPI(){const r=localStorage.getItem('uss_kpi');if(!r)return;const d=JSON.parse(r);Object.keys(d).forEach(x=>{const el=document.getElementById(x);if(el)el.value=d[x];});calcKPI();}
+function calcKPI(){
+  const Q=parseFloat(document.getElementById('k-quota').value)||0;
+  const R=parseFloat(document.getElementById('k-rev').value)||0;
+  const TA=parseInt(document.getElementById('k-taccts').value)||0;
+  const WA=parseInt(document.getElementById('k-won').value)||0;
+  const PS=parseInt(document.getElementById('k-psent').value)||0;
+  const PI=parseFloat(document.getElementById('k-pipe').value)||0;
+  const CA=parseInt(document.getElementById('k-calls').value)||0;
+  const ME=parseInt(document.getElementById('k-meets').value)||0;
+  const rp=Q>0?Math.round((R/Q)*100):0;
+  const ap=TA>0?Math.round((WA/TA)*100):0;
+  const cr=PS>0?Math.round((WA/PS)*100):null;
+  const rem=Math.max(Q-R,0);
+  const cov=rem>0?Math.round((PI/rem)*100):null;
+  document.getElementById('km-rev').textContent=rp+'%';
+  document.getElementById('km-revsub').textContent='$'+R.toLocaleString()+' of $'+Q.toLocaleString();
+  document.getElementById('km-revbar').style.width=Math.min(rp,100)+'%';
+  document.getElementById('km-revbar').className='pbar '+(rp>=75?'pbar-a':rp>=40?'pbar-b':'pbar-c');
+  document.getElementById('km-accts').textContent=WA+'/'+TA;
+  document.getElementById('km-acctssub').textContent=ap+'% of target';
+  document.getElementById('km-acctsbar').style.width=Math.min(ap,100)+'%';
+  document.getElementById('km-cr').textContent=cr!==null?cr+'%':'—';
+  document.getElementById('km-crsub').textContent=PS>0?PS+' sent, '+WA+' won':'no proposals yet';
+  document.getElementById('km-cov').textContent=cov!==null?cov+'%':'—';
+  document.getElementById('km-covsub').textContent=rem>0?'$'+rem.toLocaleString()+' left':'quota hit!';
+  let c='';
+  if(rp<25)c+='• Early or behind pace. Priority: get 5 new proposals out this week — volume fixes everything early.\n';
+  else if(rp<60)c+='• On pace. Stay consistent — every deal you close now is breathing room at end of month.\n';
+  else c+='• Strong pace. Focus on closing what\'s warm, not opening new deals.\n';
+  if(cr!==null&&cr<20)c+='• Close rate under 20% — this is the #1 priority. Personalize proposals, follow up within 72 hours. Use Proposal Builder and Follow-up Engine.\n';
+  else if(cr!==null&&cr>=20)c+='• Solid close rate. Protect it by only sending proposals to qualified prospects.\n';
+  if(cov!==null&&cov<150)c+='• Pipeline is thin vs remaining quota. Go to New Business Hunter — you need more in the funnel now.\n';
+  else if(cov!==null)c+='• Good pipeline coverage. Focus on velocity — push existing deals through stages.\n';
+  if(CA>0&&ME>0){const c2m=Math.round(CA/ME);c+='• Booking 1 meeting per '+c2m+' calls. '+(c2m>25?'Work on your opener — use the Cold Call script.':'Good conversion. Keep the volume up.')+'\n';}
+  document.getElementById('kpi-coach').textContent=c||'Enter actuals above for coaching.';
+}
+
+// ── PROPOSAL ──
+function addUnit(){const c=document.getElementById('units-wrap');const d=document.createElement('div');d.className='urow';d.innerHTML=`<div><label>Product</label><select class="utype" onchange="calcTotal()">${Object.keys(PRICING).map(k=>`<option>${k}</option>`).join('')}</select></div><div><label>Qty</label><input type="number" class="uqty" value="1" min="1" oninput="calcTotal()"></div><div><label>Days</label><input type="number" class="udays" value="1" min="1" oninput="calcTotal()"></div><button class="btn-danger-icon" onclick="removeUnit(this)">×</button>`;c.appendChild(d);calcTotal();}
+function removeUnit(btn){const rows=document.querySelectorAll('.urow');if(rows.length>1){btn.closest('.urow').remove();calcTotal();}}
+function calcTotal(){let tot=0;const types=[];document.querySelectorAll('.urow').forEach(r=>{const t=r.querySelector('.utype').value;const q=parseInt(r.querySelector('.uqty').value)||0;const d=parseInt(r.querySelector('.udays').value)||0;tot+=(PRICING[t]||0)*q*d;types.push(t);});document.getElementById('p-total').textContent='$'+tot.toLocaleString();const h=document.getElementById('upsell-hint');const hasR=types.some(t=>t.includes('restroom')||t.includes('trailer'));const hasF=types.some(t=>t.includes('fence')||t.includes('barrier'));const hasW=types.some(t=>t.includes('Handwashing')||t.includes('sanitizer'));const tips=[];if(hasR&&!hasW)tips.push('Upsell tip: Add handwashing stations — standard ratio is 1 per 5 restrooms. Easy add-on.');if(hasR&&!hasF)tips.push('Upsell tip: Consider temporary fencing for crowd flow — common add-on for festivals over 500 people.');if(tips.length){h.textContent=tips[0];h.style.display='block';}else h.style.display='none';}
+function genProposal(){
+  const co=document.getElementById('p-co').value||'[Company]';
+  const ct=document.getElementById('p-ct').value||'[Contact]';
+  const ev=document.getElementById('p-ev').value||'[Event]';
+  const dt=document.getElementById('p-dt').value||'[Date]';
+  const att=document.getElementById('p-att').value||'[X]';
+  const loc=document.getElementById('p-loc').value||'[Location]';
+  const stage=document.getElementById('p-stage').value;
+  const concern=document.getElementById('p-concern').value;
+  const notes=document.getElementById('p-notes').value;
+  let tot=0;let ul='';
+  document.querySelectorAll('.urow').forEach(r=>{const t=r.querySelector('.utype').value;const q=parseInt(r.querySelector('.uqty').value)||0;const d=parseInt(r.querySelector('.udays').value)||0;const line=(PRICING[t]||0)*q*d;tot+=line;ul+=`  • ${q}x ${t} × ${d} day(s) — $${line.toLocaleString()}\n`;});
+  const opener=stage.includes('First')?`It was great connecting with you. I put together a custom quote for ${ev} based on your attendance of ${att} guests.`:stage.includes('Warm')?`Following up on our conversation — here's the tailored proposal for ${ev} we discussed.`:stage.includes('Return')?`Always great working with your team. Here's the proposal for ${ev}.`:`[Referral name] mentioned you're planning ${ev} — here's a quote that should fit your needs.`;
+  const cl=concern.includes('Price')?'\nI\'ve structured this for best value per unit. If budget is a factor, I can show you a scaled option that still meets code.':concern.includes('Reliability')?'\nUSS guarantees on-time delivery — our Central/South FL ops team handles hundreds of events annually. I\'ll personally confirm logistics 72 hours before setup.':concern.includes('Clean')?'\nAll units are cleaned, sanitized, and inspected before delivery. Trailer options include climate control and interior lighting.':concern.includes('Last')?'\nEven with a short runway we can confirm delivery within 48–72 hours. Let me know if you want me to hold inventory while you finalize.':'';
+  const out=`Subject: Custom sanitation proposal — ${ev} (${dt})\n\nHi ${ct},\n\n${opener}${cl}\n\nProposed services for ${ev} at ${loc}:\n\n${ul}\nTotal estimate: $${tot.toLocaleString()}\n\nThis covers full delivery, setup, servicing throughout the event, and pickup. With ${att} attendees this configuration meets OSHA-recommended sanitation ratios and keeps lines short in FL heat.\n\nI'd love to walk you through this on a quick 10-minute call — I can also adjust counts or swap in trailer options for VIP areas.\n\nAre you available [Day] or [Day] this week?\n\n[Your name]\nUnited Site Services — Central & South Florida\n[Phone] | [Email]\n\n────────────────────────\nCALL TALKING POINTS:\n• Lead with attendance ratio justification — shows expertise\n• Mention USS FL coverage and same-day emergency servicing\n• Have a scaled-down option ready if they push back on budget\n• Ask: "What matters most — unit count, presentation, or speed?"\n${notes?'• Note: '+notes:''}`;
+  document.getElementById('prop-out').innerHTML=`<div class="card" style="margin-top:12px"><div class="ctitle">Proposal email — ready to send</div><div class="output">${out}</div><button class="btn-ghost" style="margin-top:10px;width:100%" onclick="copy(\`${out.replace(/`/g,'\\`')}\`)">Copy to clipboard</button></div>`;
+  toast('Proposal generated!');
+}
+
+// ── OUTREACH ──
+function toggleExisting(){const v=document.getElementById('o-atype').value;document.getElementById('existing-ctx').style.display=v==='cold'?'none':'block';}
+const ANGLES={compliance:'keeping you fully covered on OSHA and FL health code sanitation requirements',experience:'making sure your guests have a great restroom experience — bad sanitation shows up in event reviews',reliability:'guaranteeing on-time delivery so that\'s one less thing on your plate on event day',speed:'turning around confirmed logistics within 24–48 hours even for last-minute events',local:'serving your events with a local FL operations team — no out-of-state vendors, no surprises'};
+function genOutreach(){
+  const atype=document.getElementById('o-atype').value;
+  const fmt=document.getElementById('o-fmt').value;
+  const name=document.getElementById('o-name').value||'there';
+  const org=document.getElementById('o-org').value||'your organization';
+  const role=document.getElementById('o-role').value;
+  const angle=document.getElementById('o-angle').value;
+  const last=document.getElementById('o-last').value;
+  const oppty=document.getElementById('o-oppty').value;
+  const ctx=document.getElementById('o-ctx').value;
+  const fmtLabel={e1:'Cold email',e2:'Value-add follow-up',call:'Cold call script',vm:'Voicemail',li:'LinkedIn message'};
+  let out='';
+  if(atype==='cold'){
+    if(fmt==='e1')out=`Subject: Sanitation plan for ${org}?\n\nHi ${name},\n\nI'm [Your name] with United Site Services — we handle portable restrooms, handwashing stations, and temporary fencing for events across Central and South Florida.\n\nI work specifically with event organizers focused on ${ANGLES[angle]}.\n\nMost ${role.toLowerCase()}s I talk to say the restroom situation is the one piece of logistics they dread most. We take it entirely off your plate — delivery, setup, servicing, and pickup.\n\nWould a quick 10-minute call make sense? I can put together a same-day quote once I know your attendance and dates.\n\n[Your name]\nUnited Site Services — Central & South FL\n[Phone] | [Email]`;
+    else if(fmt==='e2')out=`Subject: One thing I didn't mention — ${org}\n\nHi ${name},\n\nFollowing up on my last note. In Florida heat, OSHA recommends 1 restroom per 40 attendees per 10 hours — but in summer above 90°F we recommend 1 per 30 to keep lines short. Getting this wrong shows up in your event reviews.\n\nI'd love 10 minutes to walk through the right setup for your headcount. No pressure — useful info whether you book with us or not.\n\nFree [Day] or [Day]?\n\n[Your name]`;
+    else if(fmt==='call')out=`COLD CALL SCRIPT\n\n[Opener — 8 seconds]\n"Hi ${name}, this is [Your name] with United Site Services — I'll be super quick. I work with event organizers across Florida on sanitation logistics. Do you have 2 minutes?"\n\n[Find the pain]\n"Most ${role.toLowerCase()}s tell me the restroom situation is what they dread most about event day. Is that something you have locked in for ${org}, or still figuring it out?"\n\n[If no vendor]\n"Great — what's your headcount and event date? I can get you a quote this afternoon."\n\n[If has vendor]\n"Who are you using? [Listen.] Got it — I just want to be in your network as backup. If anything falls through, one call and we're there."\n\n[Close]\n"What's the best email to send something over?"`;
+    else if(fmt==='vm')out=`VOICEMAIL\n\n"Hi ${name} — this is [Your name] with United Site Services. We handle portable sanitation for events across Central and South Florida.\n\nI wanted to connect about ${org} and make sure your sanitation logistics are covered. We specialize in events specifically.\n\nCall me back at [Your number] — I'll also shoot you a quick email. Thanks ${name}."`;
+    else out=`LINKEDIN\n\nHi ${name}, I noticed you're involved with ${org} — wanted to connect.\n\nI work with United Site Services handling portable sanitation for events across FL. We specifically serve event organizers, not just general rental.\n\nNot a hard pitch — just want to be a resource. If sanitation ever becomes a pain point, I'm one message away.\n\nWorth connecting?\n[Your name]`;
+  } else if(atype==='existing'){
+    const hl=last?`Our records show ${org} has used USS before (${last}) — you already know how we work.`:`${org} is already in our USS account system, which means there's an existing relationship here.`;
+    if(fmt==='e1')out=`Subject: Picking up where we left off — ${org}\n\nHi ${name},\n\nMy name is [Your name] — I'm the USS Account Executive for events in Central and South Florida.\n\n${hl} I wanted to personally introduce myself and make sure you're well taken care of going forward.\n\nI specialize exclusively in events — festivals, concerts, outdoor events — so I'm built for what ${org} does. I'd love to get on a quick call, understand what's coming up on your calendar, and make sure we're set up to support it.\n\nDo you have 15 minutes this week?\n\n[Your name]\nUnited Site Services — Events Division\n[Phone] | [Email]`;
+    else if(fmt==='call')out=`EXISTING ACCOUNT CALL SCRIPT\n\n[Opener]\n"Hi ${name}, this is [Your name] — the USS Account Executive for events in your area. I can see ${org} is already in our system and I wanted to personally introduce myself. Do you have 2 minutes?"\n\n[Bridge]\n"${last?`I noticed you've worked with USS before for ${last} — I just want to make sure you have a direct contact going forward.`:'I\'m the new events-focused rep covering your area and wanted to introduce myself properly.'}" \n\n[Discovery]\n"What events do you have coming up in the next few months? I want to make sure we're ready to support you."\n\n[Close]\n"Can I put together a quick quote for [event]? I'll have it to you same day."`;
+    else out=`Subject: Your USS contact for upcoming events\n\nHi ${name},\n\nI'm [Your name], the USS Account Executive for events in Central and South Florida.\n\n${hl}\n\nI focus exclusively on events so I understand your logistics needs differently than a general rep. I'd love to know what's on your calendar for the next few months.\n\nWhat events are you planning?\n\n[Your name]\nUnited Site Services\n[Phone] | [Email]`;
+  } else if(atype==='oppty'){
+    const ol=oppty?`I can see there's an open opportunity — ${oppty} — that hasn't had recent activity.`:`There's an open opportunity in our system for ${org} that hasn't moved recently.`;
+    if(fmt==='e1')out=`Subject: Still on your radar — ${org}?\n\nHi ${name},\n\nThis is [Your name] with USS Events. ${ol}\n\nI wanted to personally pick this up and see where things stand. I'm not just a follow-up — I'm the events specialist for Central and South FL.\n\nCan we connect for 10 minutes? Even if timing isn't right I'd rather know than have this sit.\n\n[Your name]\n[Phone] | [Email]`;
+    else if(fmt==='call')out=`OPEN OPPORTUNITY CALL SCRIPT\n\n[Opener]\n"Hi ${name}, this is [Your name] with United Site Services. I'm the events specialist for Central and South Florida — I was reviewing open opportunities and noticed ${ol.toLowerCase()} I wanted to personally pick this up. Do you have 2 minutes?"\n\n[Re-qualify]\n"Is the event we were discussing still in planning? I want to understand where things stand."\n\n[If still active]\n"Great — what would make this easy to move forward? I can turn around a revised quote same day."\n\n[If timing shifted]\n"No problem — when would be right for me to follow back up? I'll put it in my calendar."`;
+    else out=`Subject: Quick check-in — ${org}\n\nHi ${name},\n\n${ol} I wanted to personally check in — not just send another automated follow-up.\n\n${ctx?`Context I have: ${ctx}\n\n`:''}Is this still moving, or has the timeline shifted? Either way I just want to know so I can be useful.\n\n[Your name]\n[Phone] | [Email]`;
+  } else {
+    const ll=last?`I see ${org} has used USS previously (${last}) — I wanted to reconnect.`:`${org} has a history with USS and I wanted to personally reconnect.`;
+    out=`Subject: Reconnecting — ${org} + USS\n\nHi ${name},\n\nI'm [Your name] — the USS Account Executive specifically covering events in Central and South Florida.\n\n${ll}\n\nA lot has changed with our events division — expanded FL footprint, added trailer inventory, same-day emergency coverage. I'd love to understand what ${org} has on the calendar and reconnect.\n\nDo you have 15 minutes this week?\n\n[Your name]\n[Phone] | [Email]`;
+  }
+  document.getElementById('out-out').innerHTML=`<div class="card" style="margin-top:12px"><div class="ctitle">${fmtLabel[fmt]}</div><div class="output">${out}</div><button class="btn-ghost" style="margin-top:10px;width:100%" onclick="copy(\`${out.replace(/`/g,'\\`')}\`)">Copy to clipboard</button></div>`;
+  toast('Outreach generated!');
+}
+
+// ── FOLLOW-UP ──
+function genFollowup(){
+  const name=document.getElementById('f-name').value||'there';
+  const ev=document.getElementById('f-ev').value||'your event';
+  const days=document.getElementById('f-days').value;
+  const seqs={
+    '1':[{day:'Same day — 4pm',sub:`Quick note: your ${ev} proposal`,body:`Hi ${name},\n\nJust wanted to make sure the proposal landed — sometimes these end up in spam. Let me know if you have questions or want to talk through unit counts. Happy to jump on a call this week.`},{day:'Day 3',sub:`One thing I wanted to add — ${ev}`,body:`Hi ${name},\n\nI was thinking about your setup and wanted to flag that adding handwashing stations makes a real difference in guest experience — and keeps you covered on health code. I can fold that in at no extra service charge if we confirm this week.`},{day:'Day 7',sub:`Still holding inventory for ${ev}`,body:`Hi ${name},\n\nI've been holding the unit count in our FL inventory — summer events book fast. If this isn't moving forward that's totally fine, just let me know so I can release the hold. Otherwise I'm one call away.`}],
+    '5':[{day:'Today — re-engage',sub:`Still thinking about ${ev}?`,body:`Hi ${name},\n\nCircling back on the proposal. I know event planning gets hectic — just making sure this didn't fall through the cracks. Is there anything I can adjust to make this easier to decide?`},{day:'Day 5',sub:`Quick question about ${ev}`,body:`Hi ${name},\n\nWhat's your plan for crowd flow near the restroom area? We can include temporary fencing to create a defined queue zone — most coordinators say it eliminates a real headache. Happy to add it to the quote.`},{day:'Day 12 — final nudge',sub:`Last check-in on ${ev}`,body:`Hi ${name},\n\nI don't want to keep filling your inbox so this'll be my last note on this one. If you went another direction, no hard feelings — just let me know. If you're still evaluating I can turn around a revised quote same day.`}],
+    '10':[{day:'Today — pattern interrupt',sub:`Different approach — ${ev}`,body:`Hi ${name},\n\nI'll keep this short. I know I've reached out a few times. If you're still planning ${ev} and want to talk options I'm available for a 10-minute call this week. If not, totally understood. Either way, hope the event goes great.`},{day:'Day 7 — value drop',sub:'Something useful for your event planning',body:`Hi ${name},\n\nNo ask here — just a tip. For FL summer outdoor events, OSHA recommends 1 restroom per 40 attendees per 10-hour period in heat above 90°F. If your headcount shifts I can recalculate in 5 minutes. Offer stands.`}],
+    '21':[{day:'Today — reopen',sub:'Checking in — future events?',body:`Hi ${name},\n\nIt's been a while since we connected on ${ev}. I wanted to stay on your radar for any future events — we've expanded our FL coverage and offer faster turnarounds now. Worth a quick reconnect?`}]
+  };
+  const seq=seqs[days]||seqs['5'];
+  let html='';
+  seq.forEach(s=>{html+=`<div class="fu-card"><div class="day-pill">${s.day}</div><div class="fu-sub">Subject: ${s.sub}</div><div class="fu-body">${s.body.replace(/\n/g,'<br>')}</div><button class="btn-ghost" style="margin-top:10px" onclick="copy(\`${s.body.replace(/`/g,'\\`')}\`)">Copy</button></div>`;});
+  document.getElementById('fu-out').innerHTML=html;
+  toast('Sequence ready!');
+}
+
+// ── OBJECTIONS ──
+const OBJS={
+  price:{t:'"Your price is too high"',l:['Acknowledge: "I hear you — budget is always a real factor."','Reframe: "The cost per attendee works out to [X cents]. What\'s your cost if the restroom situation becomes a health complaint or a social media moment?"','Offer a trim: "Let me show you a scaled-back version that still meets code — 10 minutes."','Anchor: "I\'d rather help you find the right number than have you short on units day-of."','Close: "If I can get within [X%] of your target, are we good to move forward?"']},
+  vendor:{t:'"We already have a vendor"',l:['Validate: "That\'s smart. Mind if I ask who you\'re working with?"','Find the gap: "What\'s been your experience — anything you wish was handled differently?"','Plant a seed: "I\'m not asking you to switch cold. I just want to be your backup quote. That way you have leverage either way."','USS angle: "We have same-day emergency coverage in FL that most regional vendors can\'t match."','Close: "Would it be okay if I stayed in touch for your next event?"']},
+  think:{t:'"I need to think about it"',l:['Clarify: "Of course. Is there a specific part you\'re weighing, or more of a timing thing?"','If timing: "FL summer events book inventory fast. If I hold your unit count through [date] that gives you runway without pressure."','If comparing: "Are you getting other quotes? I\'m happy to do a side-by-side."','Set next step: "When do you think you\'ll have a better sense? I\'ll follow up then — not before."','Leave a reason: "If we confirm this week I can include complimentary first-day servicing."']},
+  boss:{t:'"I need to check with my boss"',l:['Make it easy: "What does your boss need to see to approve something like this?"','Offer collateral: "I can send a one-pager — unit count, total cost, what\'s included — easy to forward."','Get on the meeting: "Would it help if I joined a quick call? I can answer questions directly."','Find the gatekeeper: "Is your boss the final decision-maker, or does it go to anyone else?"','Set follow-up: "When\'s a good time after you\'ve looped them in?"']},
+  small:{t:'"Our event is too small"',l:['Reframe: "We love smaller events — simpler logistics and you get more personal attention."','Show the math: "Even for 200 attendees you need at least 5 units to stay compliant with FL health codes."','Offer right-sized: "Let me put together a quote just for your size — no upsell, just what you need."','Close: "What\'s the date? I can have numbers to you today."']},
+  late:{t:'"We\'re booking too close to the event"',l:['Reassure: "That\'s what we specialize in. What\'s your event date?"','Quantify: "If you confirm today I can have delivery confirmed within 24 hours and units on-site 48 hours before your event."','Create urgency: "The one thing that could limit us is inventory — let me check availability right now."','Make it easy: "I just need a headcount and location — I can quote on this call."']},
+  diy:{t:'"We were going to handle it ourselves"',l:['Stay curious: "What were you thinking of doing? Renting units directly?"','Hidden costs: "Most people don\'t realize delivery, setup, servicing, and pickup are all separate when you go direct. We bundle everything."','Time value: "What\'s your time worth during event setup? Most coordinators say handling restrooms themselves costs 3–4 hours they didn\'t budget for."','Offer comparison: "Let me send a side-by-side of DIY vs our all-in pricing — might surprise you."']},
+  budget:{t:'"We don\'t have budget for this"',l:['Validate: "I hear that — I want to help you find something that works, not just push a quote."','Reframe: "In Florida, permitted events above certain attendance are required to provide sanitation. This isn\'t really optional."','Find the number: "What IS in the budget for logistics? Even a rough ballpark — I can work backwards."','Minimum option: "Let me show you the absolute minimum that keeps you compliant."','Payment: "We also work with payment terms on larger events — happy to talk through that."']}
+};
+function showObj(){
+  const k=document.getElementById('obj-sel').value;
+  const out=document.getElementById('obj-out');
+  if(!k){out.innerHTML='';return;}
+  const o=OBJS[k];
+  let html=`<div class="card"><div class="ctitle">${o.t}</div>`;
+  o.l.forEach(l=>html+=`<div class="obj-item">${l}</div>`);
+  html+='</div>';
+  out.innerHTML=html;
+}
+
+// ── BRIEFING ──
+function genBriefing(){
+  const date=document.getElementById('b-date').value||'Today';
+  const sched=document.getElementById('b-sched').value||'nothing scheduled';
+  const hot=document.getElementById('b-hot').value||'none noted — find one';
+  const cold=document.getElementById('b-cold').value||'none noted';
+  const quota=document.getElementById('b-quota').value;
+  const energy=document.getElementById('b-energy').value;
+  const qmap={ahead:'You\'re ahead of pace — protect it. Close what\'s warm before chasing new.',on:'You\'re on pace. Stay disciplined — one new account this week keeps you there.',behind:'You\'re behind. Urgency is real. Every hour today should have a revenue purpose.',start:'Fresh start. Build the habit from day one.'};
+  const emap={high:'Energy is high — make cold calls first. Do the hard thing first.',med:'Medium energy — start with a warm follow-up to get a win, then go cold.',low:'Low energy — send 3 follow-up emails first, then make 5 calls. Small wins build momentum.'};
+  document.getElementById('brief-out').innerHTML=`<div class="card" style="margin-top:12px"><div class="ctitle">Morning briefing — ${date}</div><div class="brief-row"><div class="bicon bi-b">!</div><div><div class="btxt">${hot}</div><div class="bsub">Your #1 priority. Touch this before anything else — first hour.</div></div></div><div class="brief-row"><div class="bicon bi-a">FU</div><div><div class="btxt">At risk: ${cold}</div><div class="bsub">Send a follow-up now with a fresh angle. Use the Follow-up Engine tab.</div></div></div><div class="brief-row"><div class="bicon bi-c">SC</div><div><div class="btxt">Scheduled: ${sched}</div><div class="bsub">Prep 2 facts about each prospect before every call. Know their event and headcount.</div></div></div><div class="brief-row"><div class="bicon bi-b">Q</div><div><div class="btxt">${qmap[quota]}</div><div class="bsub">Quota pacing</div></div></div><div class="brief-row"><div class="bicon bi-a">E</div><div><div class="btxt">${emap[energy]}</div><div class="bsub">Today's approach</div></div></div></div>`;
+  toast('Briefing ready!');
+}
+
+// ── CRM ──
+function genCRM(){
+  const acct=document.getElementById('sf-acct').value||'[Account]';
+  const ct=document.getElementById('sf-ct').value||'[Contact]';
+  const out=document.getElementById('sf-out').value;
+  const notes=document.getElementById('sf-notes').value||'[Add notes]';
+  const next=document.getElementById('sf-next').value||'[TBD]';
+  const val=document.getElementById('sf-val').value||'TBD';
+  const om={connect:'Connected — full conversation',vm:'Left voicemail',na:'No answer — no voicemail',int:'Connected — expressed interest, quote requested',nr:'Connected — not ready now, future opportunity',yes:'Connected — verbal interest, moving to proposal'};
+  const sm={connect:'Prospecting',vm:'Prospecting',na:'Prospecting',int:'Qualified',nr:'Prospecting — long-term',yes:'Proposal / Verbal'};
+  const today=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const txt=`Activity Type: Call\nDate: ${today}\nAccount: ${acct}\nContact: ${ct}\nOutcome: ${om[out]}\n\nCall Notes:\n${notes}\n\nNext Step: ${next}\nEstimated Deal Value: ${val}\nOpportunity Stage: ${sm[out]}`;
+  document.getElementById('crm-out').innerHTML=`<div class="card" style="margin-top:12px"><div class="ctitle">Salesforce note — ready to paste</div><div class="output">${txt}</div><button class="btn-ghost" style="margin-top:10px;width:100%" onclick="copy(\`${txt.replace(/`/g,'\\`')}\`)">Copy to clipboard</button><div style="font-size:11px;color:var(--text3);margin-top:8px">Paste into Activity Notes. Then create a Task immediately for: ${next}</div></div>`;
+  toast('Note ready!');
+}
+
+// ── MEETING LISTENER ──
+let recMode='auto',recognition=null,isRec=false,tLines=[],timerInt=null,secs=0;
+const THEM_TRIGS=['they said','prospect said','she said','he said','they asked','she asked','he asked','they mentioned','they told me','they pushed back','they committed','they want','their budget','their concern'];
+const ME_TRIGS=['i said','i told','i asked','i mentioned','i explained','i offered'];
+const OBJ_TRIGS=['objection','pushed back','they don\'t','they dont','they said no'];
+const ACT_TRIGS=['action item','note to self','follow up','i need to','send quote','reminder'];
+const CMT_TRIGS=['agreed','they committed','they said yes','confirmed','next step'];
+
+function setMode(m){
+  recMode=m;
+  document.querySelectorAll('.mpill').forEach(p=>p.classList.remove('active'));
+  document.getElementById('mp-'+m).classList.add('active');
+  document.getElementById('hint-auto').style.display=m==='auto'?'block':'none';
+  document.getElementById('hint-speaker').style.display=m==='speaker'?'block':'none';
+  document.getElementById('hint-manual').style.display=m==='manual'?'block':'none';
+  document.getElementById('rec-section').style.display=m==='manual'?'none':'block';
+  document.getElementById('manual-section').style.display=m==='manual'?'block':'none';
+}
+function classify(text){
+  const l=text.toLowerCase();
+  if(recMode==='auto'){
+    const isP=THEM_TRIGS.some(t=>l.includes(t));
+    const isM=ME_TRIGS.some(t=>l.includes(t));
+    const hasSales=['we offer','we can','our team','uss','united site','i\'ll send','my quote'].some(t=>l.includes(t));
+    if(isP)return{sp:'them',flag:OBJ_TRIGS.some(t=>l.includes(t))?'obj':CMT_TRIGS.some(t=>l.includes(t))?'cmt':null};
+    if(isM||hasSales)return{sp:'me',flag:ACT_TRIGS.some(t=>l.includes(t))?'act':null};
+    return{sp:'auto',flag:null};
+  } else {
+    if(OBJ_TRIGS.some(t=>l.startsWith(t)))return{sp:'them',flag:'obj'};
+    if(ACT_TRIGS.some(t=>l.startsWith(t)))return{sp:'me',flag:'act'};
+    if(CMT_TRIGS.some(t=>l.startsWith(t)))return{sp:'them',flag:'cmt'};
+    if(THEM_TRIGS.some(t=>l.startsWith(t)))return{sp:'them',flag:null};
+    if(ME_TRIGS.some(t=>l.startsWith(t)))return{sp:'me',flag:null};
+    return{sp:'me',flag:null};
+  }
+}
+function renderLine(text,cls,interim){
+  const wrap=document.getElementById('t-wrap');
+  const empty=document.getElementById('t-empty');
+  if(empty)empty.remove();
+  if(interim){
+    let il=document.getElementById('il');
+    if(!il){il=document.createElement('div');il.id='il';il.className='t-line';wrap.appendChild(il);}
+    il.innerHTML=`<span class="t-lbl lbl-auto">...</span><span class="t-txt t-interim">${text}</span>`;
+    wrap.scrollTop=9999;return;
+  }
+  const il=document.getElementById('il');if(il)il.remove();
+  const {sp,flag}=cls;
+  const lc=sp==='me'?'lbl-me':sp==='them'?'lbl-them':'lbl-auto';
+  const lt=sp==='me'?'YOU':sp==='them'?'THEM':'—';
+  let fh='';
+  if(flag==='obj')fh='<span class="t-lbl lbl-obj" style="margin-left:4px">OBJ</span>';
+  if(flag==='act')fh='<span class="t-lbl lbl-act" style="margin-left:4px">ACTION</span>';
+  if(flag==='cmt')fh='<span class="t-lbl lbl-cmt" style="margin-left:4px">COMMIT</span>';
+  const d=document.createElement('div');d.className='t-line';
+  d.innerHTML=`<span class="t-lbl ${lc}">${lt}</span>${fh}<span class="t-txt">${text}</span>`;
+  wrap.appendChild(d);wrap.scrollTop=9999;
+  tLines.push({text,sp,flag});
+}
+function startRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Speech recognition requires Chrome. Use Manual Paste mode instead.');return;}
+  recognition=new SR();recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-US';
+  tLines=[];document.getElementById('t-wrap').innerHTML='<div style="color:var(--text3);font-size:12px;padding:3px 0" id="t-empty">Listening...</div>';
+  recognition.onresult=(e)=>{let int='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)renderLine(t.trim(),classify(t),false);else int+=t;}if(int)renderLine(int,{sp:'auto'},true);};
+  recognition.onerror=(e)=>{document.getElementById('rec-status').textContent='Mic error: '+e.error+'. Try Manual Paste.';stopRec();};
+  recognition.onend=()=>{if(isRec)recognition.start();};
+  recognition.start();isRec=true;
+  document.getElementById('btn-start').style.display='none';document.getElementById('btn-stop').style.display='inline-block';
+  document.getElementById('rec-dot').classList.add('on');
+  document.getElementById('rec-status').textContent='Recording — speak clearly, phone on speaker near mic';
+  secs=0;timerInt=setInterval(()=>{secs++;const m=Math.floor(secs/60),s=secs%60;document.getElementById('rec-timer').textContent=`${m}:${s.toString().padStart(2,'0')}`;},1000);
+}
+function stopRec(){
+  if(recognition){recognition.onend=null;recognition.stop();recognition=null;}
+  isRec=false;clearInterval(timerInt);
+  document.getElementById('btn-start').style.display='inline-block';document.getElementById('btn-stop').style.display='none';
+  document.getElementById('rec-dot').classList.remove('on');
+  document.getElementById('rec-status').textContent='Stopped — generating outputs...';
+  const full=tLines.map(l=>(l.sp==='them'?'THEM: ':l.sp==='me'?'ME: ':'')+( l.flag?`[${l.flag.toUpperCase()}] `:'')+l.text).join('\n');
+  analyzeText(full);
+}
+function clearListen(){
+  tLines=[];document.getElementById('t-wrap').innerHTML='<div style="color:var(--text3);font-size:12px;padding:3px 0" id="t-empty">Transcript will appear here as you speak...</div>';
+  document.getElementById('rec-status').textContent='Ready';document.getElementById('rec-timer').textContent='';
+  document.getElementById('listen-out').innerHTML='';
+  if(recognition){recognition.onend=null;recognition.stop();recognition=null;}
+  isRec=false;clearInterval(timerInt);
+  document.getElementById('btn-start').style.display='inline-block';document.getElementById('btn-stop').style.display='none';
+  document.getElementById('rec-dot').classList.remove('on');
+}
+function analyzeText(text){
+  if(!text||text.trim().length<8){document.getElementById('rec-status').textContent='Not enough content.';return;}
+  const acct=document.getElementById('m-acct').value||'[Account]';
+  const ct=document.getElementById('m-ct').value||'[Contact]';
+  const ctype=document.getElementById('m-type').value;
+  const val=document.getElementById('m-val').value||'TBD';
+  const today=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('listen-out').innerHTML='<div class="card"><div class="loading"><div class="spin"></div>Analyzing call and building outputs...</div></div>';
+
+  // Build a detailed prompt and show it for Claude to process
+  const prompt=`You are a sales assistant for a USS (United Site Services) event sales rep in Central/South Florida. Speaker labels: ME = rep, THEM = prospect. [OBJ] = objection. [ACTION] = rep to-do. [COMMIT] = prospect agreed.\n\nTRANSCRIPT:\n${text}\n\nCONTEXT: Account: ${acct} | Contact: ${ct} | Call type: ${ctype} | Est. value: ${val} | Date: ${today}\n\nGenerate three clearly labeled outputs:\n\n1. SALESFORCE ACTIVITY NOTE (paste-ready):\nActivity Type / Date / Account / Contact / Outcome / Key Facts (bullet points: event details, attendance, budget, competitors mentioned, objections, interest level, commitments made) / Next Step / Opportunity Stage\n\n2. FOLLOW-UP EMAIL TO CLIENT (send-ready):\nWarm, professional, under 150 words. Reference specific things they said. Confirm what was agreed. State exact next step.\n\n3. YOUR ACTION ITEMS:\nBulleted list of what you need to do with timing. Quotes to send, tasks to create, follow-ups, anything promised.\n\nUse real specifics. Be direct and concise.`;
+
+  // Store for display after AI responds
+  document.getElementById('listen-out').innerHTML=`<div class="card"><div class="ctitle">Call analysis ready — paste this into Claude</div><div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">The transcript has been prepared. Copy the prompt below and paste it into a new Claude message to get your Salesforce note, follow-up email, and action items.</div><div class="output">${prompt}</div><button class="btn-ghost" style="margin-top:10px;width:100%" onclick="copy(\`${prompt.replace(/`/g,'\\`')}\`)">Copy analysis prompt</button></div>`;
+  toast('Transcript analyzed!');
+}
+
+// ── NEW BUSINESS SEARCH ──
+function searchEvents(){
+  const cat=document.getElementById('h-cat').value;
+  const region=document.getElementById('h-region').value;
+  const time=document.getElementById('h-time').value;
+  document.getElementById('hunt-out').innerHTML='<div class="card"><div class="loading"><div class="spin"></div>Preparing your search query...</div></div>';
+  const prompt=`You are a sales research assistant for United Site Services (USS), a portable sanitation company. Find REAL, SPECIFIC upcoming events that need portable restrooms, handwashing stations, or temporary fencing.\n\nSearch for: ${cat} events in ${region} — ${time}\n\nFor each event provide:\n1. Event name\n2. Date and location\n3. Estimated attendance\n4. Organizer name / company\n5. How to contact them (website, email, LinkedIn)\n6. Why they need USS services\n\nFind at least 8 specific real events. Prioritize confirmed/announced events. After the list, identify the 3 highest-priority prospects to call first and explain why.`;
+  document.getElementById('hunt-out').innerHTML=`<div class="card"><div class="ctitle">Search query ready</div><div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">Copy this prompt and paste it into Claude chat to get a live list of real events in your territory with organizer contact details.</div><div class="output">${prompt}</div><button class="btn" style="margin-top:10px" onclick="copy(\`${prompt.replace(/`/g,'\\`')}\`);toast('Copied — paste into Claude chat!')">Copy & search now →</button></div>`;
+}
+</script>
+</body>
+</html>
